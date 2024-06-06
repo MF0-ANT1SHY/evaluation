@@ -1,0 +1,7 @@
+Metadata-Version: 2.1
+Name: eTainter
+Version: 0.1.0
+Home-page: https://github.com/DependableSystemsLab/eTainter
+License: MIT
+Requires-Python: >=3.8
+License-File: LICENSE
