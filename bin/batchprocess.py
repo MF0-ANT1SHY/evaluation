@@ -514,6 +514,8 @@ def process_file(args, initial_storage, logger, name):
         configure_memory_limits(args.memory)
         with open(args.file) as infile:
             inbuffer = infile.read().rstrip()
+        if inbuffer.startswith("0x"):
+            inbuffer = inbuffer[2:]
         file_size = os.path.getsize(args.file)
         code = bytes.fromhex(inbuffer)
         p = Project(code)
@@ -599,7 +601,8 @@ def batch_process():
 
     # 设置多个目录路径
     directories = [
-        os.path.expanduser("datasets/Ethereum/bytecode"),
+        os.path.expanduser("/home/shuo/repo/TaintStateMachine/datasets/TN"),
+        
     ]
 
     avamem = adjust_pool_size()
