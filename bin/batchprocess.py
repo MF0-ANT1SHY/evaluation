@@ -499,20 +499,26 @@ def process_file(args, initial_storage, logger, name):
     ULisworth = None
     DFisworth = None
     CFG_duration = None
+    CFG_endmem = None
     isTimeout = False
     isMemoryError = False
+    exception = None
+    file_size = 0
     # 记录起始时间
     _start = time.time()
     signal.signal(signal.SIGALRM, handle_timeout)
     signal.alarm(timeout_seconds)
+    # 记录起始内存
+    startmem = process.memory_info().rss / (1024 * 1024)
     try:
-        configure_memory_limits(args.memory, logger, name)
+        configure_memory_limits(args.memory)
         with open(args.file) as infile:
             inbuffer = infile.read().rstrip()
+        file_size = os.path.getsize(args.file)
         code = bytes.fromhex(inbuffer)
         p = Project(code)
         CFG_endtime = time.time()
-        CFG_endmem = process.memory_info().rss / (1024 * 1024)
+        CFG_endmem = process.memory_info().rss / (1024 * 1024) - startmem
         CFG_duration = CFG_endtime - _start
         res, mem, jcount, ULisworth, DFisworth = analysis(
             p, initial_storage=initial_storage
@@ -524,26 +530,30 @@ def process_file(args, initial_storage, logger, name):
         isMemoryError = True
         gc.collect()
     except Exception as e:
+        exception = e
         gc.collect()
     finally:
-        if not CFG_endmem:
+        if CFG_endmem is None:
             CFG_endmem = None
-        if not mem:
-            mem = process.memory_info().rss / (1024 * 1024)
-        if not jcount:
+        if mem is None:
+            mem = process.memory_info().rss / (1024 * 1024) - startmem
+        if jcount is None:
             jcount = p.cfg.jumpcount
-        if not ULisworth:
+        if ULisworth is None:
             ULisworth = None
-        if not DFisworth:
+        if DFisworth is None:
             DFisworth = None
-        if not CFG_duration:
+        if CFG_duration is None:
             CFG_duration = None
         _end = time.time()
         signal.alarm(0)
         _duration = _end - _start
         logger.info(
-            f"{name},{isTimeout},{isMemoryError},{jcount},{CFG_endmem},{ULisworth},{DFisworth},{CFG_duration},{_duration},{mem}"
+            f"{name},{file_size},{isTimeout},{isMemoryError},{jcount},{CFG_endmem},{ULisworth},{DFisworth},{CFG_duration},{_duration},{mem},{exception}"
         )
+
+
+# 0xedd4e9a8ca1e0d138c16cf205fbe54125d2090cf.code,False,False,9,None,None,None,8.678436279296875e-05,0.06797409057617188,183.30859375,None
 
 
 def main(logger, name):
@@ -615,3 +625,6 @@ def batch_process():
 
 if __name__ == "__main__":
     batch_process()
+    # process_code(
+    #     "datasets/Ethereum/bytecode/0xedd4e9a8ca1e0d138c16cf205fbe54125d2090cf.code"
+    # )
