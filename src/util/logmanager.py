@@ -1,4 +1,5 @@
 import logging
+import os
 
 
 def setuplogger(logname=None):
@@ -15,7 +16,18 @@ def setuplogger(logname=None):
     logger.setLevel(logging.DEBUG)  # 设置为DEBUG，捕获所有级别的日志
 
     # 配置文件处理器，用于写入日志文件
-    handler = logging.FileHandler(f"./evaluation/{logname}.log")
+    # 日志文件的路径
+    log_directory = "./evaluation"
+
+    # 完整的日志文件路径
+    log_path = os.path.join(log_directory, f"{logname}.log")
+
+    # 检查目录是否存在，不存在则创建
+    if not os.path.exists(log_directory):
+        os.makedirs(log_directory)
+
+    # 创建日志记录器
+    handler = logging.FileHandler(log_path)
     handler.setLevel(logging.INFO)  # 文件处理器也设置为DEBUG
 
     # 配置日志格式
