@@ -432,6 +432,31 @@ def analysis(
 
 
 def main():
+    def run_process(queue, p, initial_storage):
+        res = None
+        mem = None
+        jcount = None
+        ULisworth = None
+        DFisworth = None
+        CFG_duration = None
+        CFG_endmem = None
+        try:
+            p.cfg
+            CFG_endtime = time.time()
+            CFG_endmem = process.memory_info().rss / (1024 * 1024) - startmem
+            CFG_duration = CFG_endtime - _start
+            res, mem, jcount, ULisworth, DFisworth = analysis(
+                p, initial_storage=initial_storage
+            )
+            # return res, mem, jcount, ULisworth, DFisworth, CFG_endmem, CFG_duration
+            queue.put(
+                (res, mem, jcount, ULisworth, DFisworth, CFG_endmem, CFG_duration)
+            )
+        except TimeoutException as e:
+            # return None, None, None, None, None, None, None
+            queue.put((None, None, None, None, None, None, None))
+            raise e
+
     logger = setuplogger()
     parser = argparse.ArgumentParser()
     grp = parser.add_mutually_exclusive_group(required=True)
@@ -509,41 +534,44 @@ def main():
     file_size = 0
     # 记录起始时间
     _start = time.time()
-    signal.signal(signal.SIGALRM, handle_timeout)
-    signal.alarm(timeout_seconds)
     # 记录起始内存
     startmem = process.memory_info().rss / (1024 * 1024)
     try:
         with open(args.file) as infile:
             inbuffer = infile.read().rstrip()
         name = args.file.rsplit("/", 1)[-1]
+        logger.info(f"{name}")
         file_size = os.path.getsize(args.file)
         if inbuffer.startswith("0x"):
             inbuffer = inbuffer[2:]
         code = bytes.fromhex(inbuffer)
         p = Project(code)
-        CFG_endtime = time.time()
-        CFG_endmem = process.memory_info().rss / (1024 * 1024) - startmem
-        CFG_duration = CFG_endtime - _start
-        res, mem, jcount, ULisworth, DFisworth = analysis(
-            p, initial_storage=initial_storage
+
+        queue = multiprocessing.Queue()
+        analysisprocess = multiprocessing.Process(
+            target=run_process, args=(queue, p, initial_storage)
         )
+        analysisprocess.start()
+        analysisprocess.join(timeout_seconds)
+        if analysisprocess.is_alive():
+            analysisprocess.terminate()
+            analysisprocess.join()
+            raise TimeoutException("Execution timed out")
+        else:
+            res, mem, jcount, ULisworth, DFisworth = queue.get()
     except TimeoutException as e:
         isTimeout = True
-        gc.collect()
+        exception = e
     except MemoryError as e:
         isMemoryError = True
-        gc.collect()
+        exception = e
     except Exception as e:
         exception = e
-        gc.collect()
     finally:
         if CFG_endmem is None:
             CFG_endmem = None
         if mem is None:
             mem = process.memory_info().rss / (1024 * 1024) - startmem
-        if jcount is None:
-            jcount = p.cfg.jumpcount
         if ULisworth is None:
             ULisworth = None
         if DFisworth is None:
