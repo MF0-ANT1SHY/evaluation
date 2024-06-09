@@ -433,18 +433,21 @@ def analysis(
 
 def main():
     def run_process(queue, p, initial_storage):
-        res = None
-        mem = None
-        jcount = None
-        ULisworth = None
-        DFisworth = None
-        CFG_duration = None
-        CFG_endmem = None
-        # 记录起始时间
-        _start = time.time()
-        # 记录起始内存
-        startmem = process.memory_info().rss / (1024 * 1024)
         try:
+            res = None
+            mem = None
+            jcount = None
+            ULisworth = None
+            DFisworth = None
+            CFG_duration = None
+            CFG_endmem = None
+            isTimeout = False
+            isMemoryError = False
+            error = False
+            # 记录起始时间
+            _start = time.time()
+            # 记录起始内存
+            startmem = process.memory_info().rss / (1024 * 1024)
             p.cfg
             CFG_endtime = time.time()
             CFG_endmem = process.memory_info().rss / (1024 * 1024) - startmem
@@ -452,15 +455,30 @@ def main():
             res, mem, jcount, ULisworth, DFisworth = analysis(
                 p, initial_storage=initial_storage
             )
-            # return res, mem, jcount, ULisworth, DFisworth, CFG_endmem, CFG_duration
-            queue.put(
-                (res, mem, jcount, ULisworth, DFisworth, CFG_endmem, CFG_duration)
-            )
         except TimeoutException as e:
-            queue.put(
-                (res, mem, jcount, ULisworth, DFisworth, CFG_endmem, CFG_duration)
-            )
+            isTimeout = True
             raise e
+        except MemoryError as e:
+            isMemoryError = True
+            raise e
+        except Exception as e:
+            error = e
+            raise e
+        finally:
+            queue.put(
+                (
+                    res,
+                    mem,
+                    jcount,
+                    ULisworth,
+                    DFisworth,
+                    CFG_endmem,
+                    CFG_duration,
+                    isTimeout,
+                    isMemoryError,
+                    error,
+                )
+            )
 
     logger = setuplogger()
     parser = argparse.ArgumentParser()
@@ -535,7 +553,7 @@ def main():
     CFG_endmem = None
     isTimeout = False
     isMemoryError = False
-    exception = None
+    exception = False
     file_size = 0
     # 记录起始时间
     _start = time.time()
@@ -561,11 +579,19 @@ def main():
         if analysisprocess.is_alive():
             analysisprocess.terminate()
             analysisprocess.join()
-            raise TimeoutException("Execution timed out")
         else:
-            res, mem, jcount, ULisworth, DFisworth, CFG_endmem, CFG_duration = (
-                queue.get()
-            )
+            (
+                res,
+                mem,
+                jcount,
+                ULisworth,
+                DFisworth,
+                CFG_endmem,
+                CFG_duration,
+                isTimeout,
+                isMemoryError,
+                exception,
+            ) = queue.get()
     except TimeoutException as e:
         isTimeout = True
         exception = e
