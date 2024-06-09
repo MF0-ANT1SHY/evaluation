@@ -558,7 +558,7 @@ def main():
             analysisprocess.join()
             raise TimeoutException("Execution timed out")
         else:
-            res, mem, jcount, ULisworth, DFisworth = queue.get()
+            res, mem, jcount, ULisworth, DFisworth, CFG_endmem, CFG_duration= queue.get()
     except TimeoutException as e:
         isTimeout = True
         exception = e
