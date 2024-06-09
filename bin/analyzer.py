@@ -495,18 +495,24 @@ def main():
         exit(-1)
     else:
         tainting_type = "storage"
-
+        # logger.info(
+        #     f"{name},{file_size},{isTimeout},{isMemoryError},{jcount},{CFG_endmem},{ULisworth},{DFisworth},{CFG_duration},{_duration},{mem},{exception}"
+        # )
     process = psutil.Process(os.getpid())
-    mem = None
-    jcount = None
-    ULisworth = None
-    DFisworth = None
-    CFG_duration = None
-    CFG_endmem = None
+    name = None
+    file_size = -1
+    mem = -1
+    jcount = -1
+    ULisworth = True
+    DFisworth = True
+    CFG_endmem = -1
     isTimeout = False
     isMemoryError = False
     exception = None
-    file_size = 0
+    _start = -1
+    CFG_duration = -1
+    _end = -1
+    _duration = -1
     # 记录起始时间
     _start = time.time()
     signal.signal(signal.SIGALRM, handle_timeout)
@@ -530,26 +536,17 @@ def main():
         )
     except TimeoutException as e:
         isTimeout = True
+        print("Timeout")
         gc.collect()
     except MemoryError as e:
         isMemoryError = True
+        print("MemoryError")
         gc.collect()
     except Exception as e:
         exception = e
+        print("Exception")
         gc.collect()
     finally:
-        if CFG_endmem is None:
-            CFG_endmem = None
-        if mem is None:
-            mem = process.memory_info().rss / (1024 * 1024) - startmem
-        if jcount is None:
-            jcount = p.cfg.jumpcount
-        if ULisworth is None:
-            ULisworth = None
-        if DFisworth is None:
-            DFisworth = None
-        if CFG_duration is None:
-            CFG_duration = None
         _end = time.time()
         signal.alarm(0)
         _duration = _end - _start
