@@ -449,6 +449,7 @@ def main():
             # 记录起始内存
             startmem = process.memory_info().rss / (1024 * 1024)
             p.cfg
+            # a = bytearray(1024 * 1024 * 1024 * 8)
             CFG_endtime = time.time()
             CFG_endmem = process.memory_info().rss / (1024 * 1024) - startmem
             CFG_duration = CFG_endtime - _start
@@ -466,7 +467,6 @@ def main():
             raise e
         finally:
             try:
-                del p
                 queue.put(
                     (
                         res,
@@ -482,7 +482,20 @@ def main():
                     )
                 )
             except Exception as e:
-                return
+                queue.put(
+                    (
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                        None,
+                    )
+                )
 
     logger = setuplogger()
     parser = argparse.ArgumentParser()
