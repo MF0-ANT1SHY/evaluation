@@ -528,6 +528,7 @@ def main():
             inbuffer = inbuffer[2:]
         code = bytes.fromhex(inbuffer)
         p = Project(code)
+        cfg = p.cfg
         CFG_endtime = time.time()
         CFG_endmem = process.memory_info().rss / (1024 * 1024) - startmem
         CFG_duration = CFG_endtime - _start
@@ -550,6 +551,7 @@ def main():
         _end = time.time()
         signal.alarm(0)
         _duration = _end - _start
+        mem = process.memory_info().rss / (1024 * 1024)
         logger.info(
             f"{name},{file_size},{isTimeout},{isMemoryError},{jcount},{CFG_endmem},{ULisworth},{DFisworth},{CFG_duration},{_duration},{mem},{exception}"
         )

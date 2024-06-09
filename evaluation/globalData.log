@@ -1,0 +1,13 @@
+2024-06-09 22:37:21,293, globalData, INFO, timeout.code,32624,False,True,None,None,None,None,0,0.0038564205169677734,None,None
+2024-06-09 22:39:59,786, globalData, INFO, timeout.code,32624,False,True,0,0,True,True,0,0.0035026073455810547,0,None
+2024-06-09 22:40:23,710, globalData, INFO, timeout.code,32624,False,True,0,0,True,True,0,0.0041239261627197266,0,None
+2024-06-09 22:42:45,722, globalData, INFO, timeout.code,32624,False,True,-1,-1,True,True,-1,0.0037763118743896484,-1,None
+2024-06-09 22:43:32,972, globalData, INFO, timeout.code,32624,True,False,-1,-1,True,True,-1,3.00408935546875,-1,None
+2024-06-09 22:43:52,046, globalData, INFO, timeout.code,32624,True,False,-1,0.0,True,True,0.0001785755157470703,3.1444332599639893,-1,None
+2024-06-09 22:44:37,139, globalData, INFO, timeout.code,32624,False,False,-1,0.0,True,True,0.00012040138244628906,12.285221099853516,-1,None
+2024-06-09 22:47:43,862, globalData, INFO, runningExample.code,5016,False,False,32,0.0,True,True,0.000110626220703125,0.6856334209442139,139.3984375,None
+2024-06-09 22:48:14,383, globalData, INFO, timeout.code,32624,False,False,-1,0.0,True,True,0.0001361370086669922,30.11768078804016,-1,None
+2024-06-09 22:48:47,030, globalData, INFO, timeout.code,32624,False,False,-1,-1,True,True,-1,16.890721559524536,-1,None
+2024-06-09 22:49:08,578, globalData, INFO, timeout.code,32624,False,False,-1,-1,True,True,-1,13.641140699386597,-1,None
+2024-06-09 22:49:13,892, globalData, INFO, timeout.code,32624,True,False,-1,-1,True,True,-1,3.179429292678833,-1,None
+2024-06-09 22:50:19,643, globalData, INFO, timeout.code,32624,True,False,-1,-1,True,True,-1,3.1499314308166504,110.44140625,None

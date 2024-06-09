@@ -30,7 +30,7 @@ def main():
     time.sleep(5)
 
     directories = [
-        os.path.expanduser("/home/shuo/repo/TaintStateMachine/datasets/TN"),
+        os.path.expanduser("/home/shuoy/evaluation/evaluation"),
     ]
 
     pool = Pool(num_processes)
