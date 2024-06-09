@@ -465,20 +465,24 @@ def main():
             error = e
             raise e
         finally:
-            queue.put(
-                (
-                    res,
-                    mem,
-                    jcount,
-                    ULisworth,
-                    DFisworth,
-                    CFG_endmem,
-                    CFG_duration,
-                    isTimeout,
-                    isMemoryError,
-                    error,
+            try:
+                del p
+                queue.put(
+                    (
+                        res,
+                        mem,
+                        jcount,
+                        ULisworth,
+                        DFisworth,
+                        CFG_endmem,
+                        CFG_duration,
+                        isTimeout,
+                        isMemoryError,
+                        error,
+                    )
                 )
-            )
+            except Exception as e:
+                return
 
     logger = setuplogger()
     parser = argparse.ArgumentParser()
