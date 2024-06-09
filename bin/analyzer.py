@@ -440,6 +440,10 @@ def main():
         DFisworth = None
         CFG_duration = None
         CFG_endmem = None
+        # 记录起始时间
+        _start = time.time()
+        # 记录起始内存
+        startmem = process.memory_info().rss / (1024 * 1024)
         try:
             p.cfg
             CFG_endtime = time.time()
@@ -453,8 +457,9 @@ def main():
                 (res, mem, jcount, ULisworth, DFisworth, CFG_endmem, CFG_duration)
             )
         except TimeoutException as e:
-            # return None, None, None, None, None, None, None
-            queue.put((None, None, None, None, None, None, None))
+            queue.put(
+                (res, mem, jcount, ULisworth, DFisworth, CFG_endmem, CFG_duration)
+            )
             raise e
 
     logger = setuplogger()
@@ -540,7 +545,7 @@ def main():
         with open(args.file) as infile:
             inbuffer = infile.read().rstrip()
         name = args.file.rsplit("/", 1)[-1]
-        logger.info(f"{name}")
+        # logger.info(f"{name}")
         file_size = os.path.getsize(args.file)
         if inbuffer.startswith("0x"):
             inbuffer = inbuffer[2:]
@@ -558,7 +563,9 @@ def main():
             analysisprocess.join()
             raise TimeoutException("Execution timed out")
         else:
-            res, mem, jcount, ULisworth, DFisworth, CFG_endmem, CFG_duration= queue.get()
+            res, mem, jcount, ULisworth, DFisworth, CFG_endmem, CFG_duration = (
+                queue.get()
+            )
     except TimeoutException as e:
         isTimeout = True
         exception = e
