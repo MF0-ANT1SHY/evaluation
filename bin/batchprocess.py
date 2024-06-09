@@ -25,7 +25,7 @@ import src.flow.code_info as cinfo
 import src.flow.analysis_results as analysis_results
 from src.util.logmanager import setuplogger
 
-timeout_seconds = 30 * 60  # 超时时间
+timeout_seconds = 5 * 60  # 超时时间
 
 
 class TimeoutException(Exception):
@@ -601,7 +601,7 @@ def batch_process():
 
     # 设置多个目录路径
     directories = [
-        os.path.expanduser("/home/shuo/repo/TaintStateMachine/datasets/TN"),
+        os.path.expanduser("/home/shuo/datasets/TN"),
         
     ]
 
