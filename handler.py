@@ -7,6 +7,7 @@ import csv
 
 
 def run_process(file, timeoutsize=2 * 60):
+    print(f"analyzing {file}...")
     logger = setuplogger()
     name = file.rsplit("/", 1)[-1]
     """运行单个处理进程"""
@@ -37,11 +38,13 @@ def main():
 
     directories = [
         os.path.expanduser("/home/shuo/repo/TaintStateMachine/datasets/TN"),
+        #os.path.expanduser("/home/shuo/repo/evaluation"),
+    #    /home/shuo/repo/evaluation
     ]
 
     archivefile = "archivelist.csv"
 
-    timeoutlimit = 2 * 60
+    timeoutlimit = 60*30
 
     analyzed_filenames = set()
     with open(archivefile, newline="") as csvfile:

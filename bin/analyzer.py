@@ -523,10 +523,6 @@ def main():
         res, mem, jcount, ULisworth, DFisworth = analysis(
             p, initial_storage=initial_storage
         )
-    except TimeoutException as e:
-        isTimeout = True
-        print("Timeout")
-        gc.collect()
     except MemoryError as e:
         isMemoryError = True
         print("MemoryError")
