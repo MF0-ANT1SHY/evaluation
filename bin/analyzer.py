@@ -27,16 +27,6 @@ from src.util.logmanager import setuplogger
 
 logging.basicConfig(level=logging.INFO)
 
-timeout_seconds = 30 * 60  # 超时时间
-
-
-class TimeoutException(Exception):
-    pass
-
-
-def handle_timeout(signum, frame):
-    raise TimeoutException("Execution timed out")
-
 
 def hex_encode(d):
     return {k: v.hex() if isinstance(v, bytes) else v for k, v in d.items()}
@@ -515,8 +505,6 @@ def main():
     _duration = -1
     # 记录起始时间
     _start = time.time()
-    signal.signal(signal.SIGALRM, handle_timeout)
-    signal.alarm(timeout_seconds)
     # 记录起始内存
     startmem = process.memory_info().rss / (1024 * 1024)
     try:
@@ -549,7 +537,6 @@ def main():
         gc.collect()
     finally:
         _end = time.time()
-        signal.alarm(0)
         _duration = _end - _start
         mem = process.memory_info().rss / (1024 * 1024)
         logger.info(
