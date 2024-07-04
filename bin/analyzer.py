@@ -102,8 +102,8 @@ def analysis(
     )
 
     projectinstance = p
-    ULisworth = True
-    DFisworth = True
+    ULisworth = None 
+    DFisworth = None
     process = psutil.Process(os.getpid())
     peak_memory_use = 0
     unbounded_count = 0
@@ -374,6 +374,7 @@ def analysis(
                                         v["increased_in"]
                                     )
                                 )
+                            ULisworth = True
                         print(v["ins"])
                     print("\n")
                     if r == 0:
@@ -398,6 +399,7 @@ def analysis(
                                     v["increased_in"]
                                 )
                             )
+                            DFisworth = True
                         print(v["ins"])
                     print("\n")
     current_memory = process.memory_info().rss / (1024 * 1024)
@@ -493,8 +495,8 @@ def main():
     file_size = -1
     mem = -1
     jcount = -1
-    ULisworth = True
-    DFisworth = True
+    ULisworth = None
+    DFisworth = None
     CFG_endmem = -1
     isTimeout = False
     isMemoryError = False

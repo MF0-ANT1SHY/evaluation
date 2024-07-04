@@ -36,7 +36,7 @@ def main():
     print(f"Starting {num_processes} processes...")
 
     directories = [
-        os.path.expanduser("/home/shuoy/evaluation/evaluation"),
+        os.path.expanduser("./datasets/popular_contracts/bytecode"),
     ]
 
     archivefile = "archivelist.csv"
