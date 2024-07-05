@@ -97,9 +97,12 @@ def analysis(
     tainting_type = "storage"
     ##convert_to_ssa
     sys.setrecursionlimit(10000)
+    ssatime = time.time()
     ssa = rattle.Recover(
         bytes.hex(p.code).encode(), edges=p.cfg.edges(), split_functions=False
     )
+    ssaend = time.time()
+    ssaduration = ssaend - ssatime
 
     projectinstance = p
     ULisworth = None 
@@ -420,6 +423,7 @@ def analysis(
         projectinstance.cfg.jumpcount,
         ULisworth,
         DFisworth,
+        ssaduration,
     )
 
 
@@ -503,6 +507,7 @@ def main():
     exception = None
     _start = -1
     CFG_duration = -1
+    SSA_duration = -1
     _end = -1
     _duration = -1
     # 记录起始时间
@@ -522,13 +527,9 @@ def main():
         CFG_endtime = time.time()
         CFG_endmem = process.memory_info().rss / (1024 * 1024) - startmem
         CFG_duration = CFG_endtime - _start
-        res, mem, jcount, ULisworth, DFisworth = analysis(
+        res, mem, jcount, ULisworth, DFisworth, SSA_duration = analysis(
             p, initial_storage=initial_storage
         )
-    except TimeoutException as e:
-        isTimeout = True
-        print("Timeout")
-        gc.collect()
     except MemoryError as e:
         isMemoryError = True
         print("MemoryError")
@@ -542,7 +543,7 @@ def main():
         _duration = _end - _start
         mem = process.memory_info().rss / (1024 * 1024)
         logger.info(
-            f"{name},{file_size},{isTimeout},{isMemoryError},{jcount},{CFG_endmem},{ULisworth},{DFisworth},{CFG_duration},{_duration},{mem},{exception}"
+            f"{name},{file_size},{isTimeout},{isMemoryError},{jcount},{CFG_endmem},{ULisworth},{DFisworth},{CFG_duration},{SSA_duration},{_duration},{mem},{exception}"
         )
 
 
