@@ -36,7 +36,7 @@ def main():
     print(f"Starting {num_processes} processes...")
 
     directories = [
-        os.path.expanduser("./datasets/popular_contracts/bytecode"),
+        os.path.expanduser("/home/shuo/repo/cgt/runtime"),
         #os.path.expanduser("./datasets/annotated/bytecode"),
     ]
 
@@ -60,7 +60,7 @@ def main():
     # 遍历目录中的文件
     for directory_path in directories:
         for filename in os.listdir(directory_path):
-            if filename.endswith(".code"):
+            if filename.endswith(".hex"):
                 # 检查文件是否已经被分析过
                 if filename in analyzed_filenames:
                     continue  # 已分析过的文件跳过不处理
