@@ -4,16 +4,39 @@ from multiprocessing import Pool
 import psutil
 from src.util.logmanager import setuplogger
 import csv
+import time
 
+
+def append_to_csv(contract, duration):
+    filename = "timeout_cases.csv"
+    file_exists = os.path.isfile(filename)
+
+    with open(filename, "a", newline="") as csvfile:
+        fieldnames = ["contract", "duration"]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        if not file_exists:
+            writer.writeheader()  # 如果文件不存在，写入标题行
+
+        writer.writerow(
+            {
+                "contract": contract,
+                "duration": duration,
+            }
+        )
 
 def run_process(file, timeoutsize=2 * 60):
     logger = setuplogger()
     name = file.rsplit("/", 1)[-1]
     """运行单个处理进程"""
     cmd = ["python3", "bin/analyzer.py", "-f", file, "-b"]
+    start_time = time.time()
     try:
         subprocess.run(cmd, timeout=timeoutsize)
     except subprocess.TimeoutExpired:
+        endtime = time.time()
+        duration = endtime - starttime
+        append_to_csv(name, duration)
         logger.info(
             f"{name},{None},{True},{None},{None},{None},{None},{None},{None},{timeoutsize},{None},{None}"
         )
