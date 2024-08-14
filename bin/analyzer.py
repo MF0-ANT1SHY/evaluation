@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import csv
 import logging
 import resource
 import psutil
@@ -26,6 +27,24 @@ import src.flow.analysis_results as analysis_results
 from src.util.logmanager import setuplogger
 
 logging.basicConfig(level=logging.INFO)
+
+def append_to_csv(contract, duration):
+    filename = "OOM_cases.csv"
+    file_exists = os.path.isfile(filename)
+
+    with open(filename, "a", newline="") as csvfile:
+        fieldnames = ["contract", "duration"]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        if not file_exists:
+            writer.writeheader()  # 如果文件不存在，写入标题行
+
+        writer.writerow(
+            {
+                "contract": contract,
+                "duration": duration,
+            }
+        )
 
 
 def hex_encode(d):
@@ -532,6 +551,7 @@ def main():
         )
     except MemoryError as e:
         isMemoryError = True
+        append_to_csv(name, "OOM")
         print("MemoryError")
         gc.collect()
     except Exception as e:
