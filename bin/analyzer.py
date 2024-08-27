@@ -121,7 +121,7 @@ def analysis(
         bytes.hex(p.code).encode(), edges=p.cfg.edges(), split_functions=False
     )
     ssaend = time.time()
-    ssaduration = ssaend - ssatime
+    p.ssaduration += ssaend - ssatime
 
     projectinstance = p
     ULisworth = None 
@@ -401,8 +401,10 @@ def analysis(
                     print("\n")
                     if r == 0:
                         unbounded_count += 1
+                        append_to_csv(projectinstance.name, "unbounded_count")
                     else:
                         unbounded_restr_count += 1
+                        append_to_csv(projectinstance.name, "unbounded_restr_count")
         if defect_type in (["DoS-With-Failed-Call"]):
             for l, hd in loops.items():
                 r1 = 0
@@ -422,6 +424,7 @@ def analysis(
                                 )
                             )
                             DFisworth = True
+                            append_to_csv(projectinstance.name, "dos_with_failed_call")
                         print(v["ins"])
                     print("\n")
     current_memory = process.memory_info().rss / (1024 * 1024)
@@ -442,7 +445,7 @@ def analysis(
         projectinstance.cfg.jumpcount,
         ULisworth,
         DFisworth,
-        ssaduration,
+        p.ssaduration,
     )
 
 
@@ -542,6 +545,7 @@ def main():
             inbuffer = inbuffer[2:]
         code = bytes.fromhex(inbuffer)
         p = Project(code)
+        p.name = name
         cfg = p.cfg
         CFG_endtime = time.time()
         CFG_endmem = process.memory_info().rss / (1024 * 1024) - startmem
@@ -550,6 +554,7 @@ def main():
             p, initial_storage=initial_storage
         )
     except MemoryError as e:
+        resource.setrlimit(rsrc, (mem_limit*2, mem_limit*2))
         isMemoryError = True
         append_to_csv(name, "OOM")
         print("MemoryError")

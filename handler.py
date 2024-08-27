@@ -25,7 +25,7 @@ def append_to_csv(contract, duration):
             }
         )
 
-def run_process(file, timeoutsize=2 * 60):
+def run_process(file, timeoutsize=5 * 60):
     logger = setuplogger()
     name = file.rsplit("/", 1)[-1]
     """运行单个处理进程"""
@@ -49,8 +49,8 @@ def main():
     available_memory_gb = mem.available / (1024**3)  # 可用内存转换为GB
     cpu_count = psutil.cpu_count(logical=False)  # 获取物理核心数
 
-    # 假设每个进程需要8GB内存
-    memory_per_process_gb = 8
+    # 假设每个进程需要6GB内存
+    memory_per_process_gb = 6
     max_processes_by_memory = int(available_memory_gb / memory_per_process_gb)
     max_processes_by_cpu = cpu_count
 
@@ -66,7 +66,7 @@ def main():
 
     archivefile = "archivelist.csv"
 
-    timeoutlimit = 1
+    timeoutlimit = 5*60
 
     analyzed_filenames = set()
     with open(archivefile, newline="") as csvfile:

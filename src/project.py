@@ -25,6 +25,7 @@ def load_json(path):
 
 class Project(object):
     def __init__(self, code, cfg=None):
+        self.ssaduration = 0
         self.newpath = 0
         self.coverage = 0
         self.db = None
