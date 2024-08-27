@@ -34,8 +34,9 @@ def run_process(file, timeoutsize=2 * 60):
     try:
         subprocess.run(cmd, timeout=timeoutsize)
     except subprocess.TimeoutExpired:
-        endtime = time.time()
-        duration = endtime - starttime
+        duration = timeoutsize
+        print(f"timeout")
+        print(f"append to {name} and {duration} ")
         append_to_csv(name, duration)
         logger.info(
             f"{name},{None},{True},{None},{None},{None},{None},{None},{None},{timeoutsize},{None},{None}"
@@ -65,7 +66,7 @@ def main():
 
     archivefile = "archivelist.csv"
 
-    timeoutlimit = 30 * 60
+    timeoutlimit = 1
 
     analyzed_filenames = set()
     with open(archivefile, newline="") as csvfile:
