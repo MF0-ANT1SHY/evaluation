@@ -60,13 +60,13 @@ def main():
     print(f"Starting {num_processes} processes...")
 
     directories = [
-        os.path.expanduser("./datasets/popular_contracts/bytecode"),
-        #os.path.expanduser("./datasets/annotated/bytecode"),
+        #os.path.expanduser("./datasets/popular_contracts/bytecode"),
+        os.path.expanduser("./datasets/annotated/bytecode"),
     ]
 
     archivefile = "archivelist.csv"
 
-    timeoutlimit = 5*60
+    timeoutlimit = 30*60
 
     analyzed_filenames = set()
     with open(archivefile, newline="") as csvfile:
