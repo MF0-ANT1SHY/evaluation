@@ -137,7 +137,9 @@ def analysis(
     temp_slots_count = 0
     slot_live_access_count = 0
 
-    for defect_type in list(["Unbounded-Loop", "DoS-With-Failed-Call"]):
+    # for defect_type in list(["Unbounded-Loop", "DoS-With-Failed-Call"]):
+    # for defect_type in list(["DoS-With-Failed-Call"]):
+    for defect_type in list(["Unbounded-Loop"]):
         print("Checking contract for \033[4m{0}\033[0m ".format(defect_type))
         print("------------------\n")
         ins = []
@@ -402,9 +404,50 @@ def analysis(
                     if r == 0:
                         unbounded_count += 1
                         append_to_csv(projectinstance.name, "unbounded_count")
+                        
+                        current_memory = process.memory_info().rss / (1024 * 1024)
+                        if current_memory > peak_memory_use:
+                            peak_memory_use = current_memory
+                        return (
+                            TainitAnalysisBugDetails(
+                                unbounded_count,
+                                unbounded_restr_count,
+                                loop_calls_count,
+                                griefing_count,
+                                harcoded_count,
+                                asserts_count,
+                                slot_live_access_count,
+                                temp_slots_count,
+                            ),
+                            peak_memory_use,
+                            projectinstance.cfg.jumpcount,
+                            ULisworth,
+                            DFisworth,
+                            p.ssaduration,
+                        )
                     else:
                         unbounded_restr_count += 1
                         append_to_csv(projectinstance.name, "unbounded_restr_count")
+                        current_memory = process.memory_info().rss / (1024 * 1024)
+                        if current_memory > peak_memory_use:
+                            peak_memory_use = current_memory
+                        return (
+                            TainitAnalysisBugDetails(
+                                unbounded_count,
+                                unbounded_restr_count,
+                                loop_calls_count,
+                                griefing_count,
+                                harcoded_count,
+                                asserts_count,
+                                slot_live_access_count,
+                                temp_slots_count,
+                            ),
+                            peak_memory_use,
+                            projectinstance.cfg.jumpcount,
+                            ULisworth,
+                            DFisworth,
+                            p.ssaduration,
+                        )
         if defect_type in (["DoS-With-Failed-Call"]):
             for l, hd in loops.items():
                 r1 = 0
@@ -425,6 +468,27 @@ def analysis(
                             )
                             DFisworth = True
                             append_to_csv(projectinstance.name, "dos_with_failed_call")
+
+                            current_memory = process.memory_info().rss / (1024 * 1024)
+                            if current_memory > peak_memory_use:
+                                peak_memory_use = current_memory
+                            return (
+                                TainitAnalysisBugDetails(
+                                    unbounded_count,
+                                    unbounded_restr_count,
+                                    loop_calls_count,
+                                    griefing_count,
+                                    harcoded_count,
+                                    asserts_count,
+                                    slot_live_access_count,
+                                    temp_slots_count,
+                                ),
+                                peak_memory_use,
+                                projectinstance.cfg.jumpcount,
+                                ULisworth,
+                                DFisworth,
+                                p.ssaduration,
+                            )
                         print(v["ins"])
                     print("\n")
     current_memory = process.memory_info().rss / (1024 * 1024)
