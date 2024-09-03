@@ -429,25 +429,25 @@ def analysis(
                         unbounded_restr_count += 1
                         append_to_csv(projectinstance.name, "unbounded_restr_count")
                         current_memory = process.memory_info().rss / (1024 * 1024)
-                        # if current_memory > peak_memory_use:
-                        #     peak_memory_use = current_memory
-                        # return (
-                        #     TainitAnalysisBugDetails(
-                        #         unbounded_count,
-                        #         unbounded_restr_count,
-                        #         loop_calls_count,
-                        #         griefing_count,
-                        #         harcoded_count,
-                        #         asserts_count,
-                        #         slot_live_access_count,
-                        #         temp_slots_count,
-                        #     ),
-                        #     peak_memory_use,
-                        #     projectinstance.cfg.jumpcount,
-                        #     ULisworth,
-                        #     DFisworth,
-                        #     p.ssaduration,
-                        # )
+                        if current_memory > peak_memory_use:
+                            peak_memory_use = current_memory
+                        return (
+                            TainitAnalysisBugDetails(
+                                unbounded_count,
+                                unbounded_restr_count,
+                                loop_calls_count,
+                                griefing_count,
+                                harcoded_count,
+                                asserts_count,
+                                slot_live_access_count,
+                                temp_slots_count,
+                            ),
+                            peak_memory_use,
+                            projectinstance.cfg.jumpcount,
+                            ULisworth,
+                            DFisworth,
+                            p.ssaduration,
+                        )
         if defect_type in (["DoS-With-Failed-Call"]):
             for l, hd in loops.items():
                 r1 = 0
