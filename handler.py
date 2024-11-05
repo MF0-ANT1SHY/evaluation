@@ -61,7 +61,7 @@ def main():
 
     directories = [
         #os.path.expanduser("./datasets/popular_contracts/bytecode"),
-        os.path.expanduser("./datasets/annotated/bytecode"),
+        os.path.expanduser("./TP"),
     ]
 
     archivefile = "archivelist.csv"

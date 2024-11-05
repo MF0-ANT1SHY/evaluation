@@ -25,8 +25,10 @@ from src.flow.analysis_results import TainitAnalysisBugDetails
 import src.flow.code_info as cinfo
 import src.flow.analysis_results as analysis_results
 from src.util.logmanager import setuplogger
+import csv
 
 logging.basicConfig(level=logging.INFO)
+
 
 def append_to_csv(contract, duration):
     filename = "OOM_cases.csv"
@@ -49,6 +51,40 @@ def append_to_csv(contract, duration):
 
 def hex_encode(d):
     return {k: v.hex() if isinstance(v, bytes) else v for k, v in d.items()}
+
+
+def collectjumpcount(
+    defecttype, contract, path, jcount, rjcount, iteration=0, res=True, iscomplete=True
+):
+    filename = f"vul{defecttype}.csv"
+    file_exists = os.path.isfile(filename)
+
+    with open(filename, "a", newline="") as csvfile:
+        fieldnames = [
+            "contract",
+            "path",
+            "length",
+            "jcount",
+            "reasonedjcount",
+            "iteration",
+            "result",
+        ]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        if not file_exists:
+            writer.writeheader()  # 如果文件不存在，写入标题行
+
+        writer.writerow(
+            {
+                "contract": contract,
+                "path": path,
+                "length": len(path),
+                "jcount": jcount,
+                "reasonedjcount": rjcount,
+                "iteration": iteration,
+                "result": res,
+            }
+        )
 
 
 def extract_bin_str(s):
@@ -108,26 +144,21 @@ def analysis(
     controlled_addrs=set(),
     flags=None,
 ):
+    analyzed_paths = []
     user_alerts = {
         "Unbounded-Loop": "Unbounded loop condition",
         "DoS-With-Failed-Call": "DoS-With-Failed-Call",
+        "Reentrancy": "Re-entrancy Vulnerability",
     }
     flags = flags or set(opcodes.CRITICAL)
     tainting_type = "storage"
+
     ##convert_to_ssa
     sys.setrecursionlimit(10000)
-    ssatime = time.time()
     ssa = rattle.Recover(
         bytes.hex(p.code).encode(), edges=p.cfg.edges(), split_functions=False
     )
-    ssaend = time.time()
-    p.ssaduration += ssaend - ssatime
 
-    projectinstance = p
-    ULisworth = None 
-    DFisworth = None
-    process = psutil.Process(os.getpid())
-    peak_memory_use = 0
     unbounded_count = 0
     unbounded_restr_count = 0
     loop_calls_count = 0
@@ -136,10 +167,13 @@ def analysis(
     asserts_count = 0
     temp_slots_count = 0
     slot_live_access_count = 0
+    reentrancy_count = 0
 
-    for defect_type in list(["Unbounded-Loop", "DoS-With-Failed-Call"]):
+    # for defect_type in list(["Unbounded-Loop", "DoS-With-Failed-Call", "Reentrancy"]):
+    for defect_type in list(["Reentrancy"]):
         print("Checking contract for \033[4m{0}\033[0m ".format(defect_type))
         print("------------------\n")
+        p.currentTask = defect_type
         ins = []
         taintedBy = []
 
@@ -156,14 +190,21 @@ def analysis(
                 for h in set(heads):
                     ins.append(h)
             restricted = True
+
+        elif defect_type == "Reentrancy":
+            # vulcalls = p.cfg.call_sinks()
+            vulcalls = [
+                ins for bb in p.cfg.bbs for ins in bb.ins if ins.name in ["CALL"]
+            ]
+            for calls in set(vulcalls):
+                isTransETH = True
+                if isTransETH:
+                    ins.append(calls)
+            restricted = True
+            # test
         else:
             ins = []
         if not ins:
-            # isworth = False
-            if defect_type == "Unbounded-Loop":
-                ULisworth = False
-            elif defect_type == "DoS-With-Failed-Call":
-                DFisworth = False
             continue
         vulnerable_loops = []
         loops_with_calls = []
@@ -186,6 +227,34 @@ def analysis(
 
             if taintedBy == []:
                 taintedBy = opcodes.potentially_user_controlled
+
+            """
+            do{
+                if cfg.update == False:
+                    return
+                sink = cfg.findSink(reentrancy)
+                    vulcalls = p.cfg.call_sinks()
+                    for calls in set(vulcalls):
+                        isTransETH = True
+                        b = backward_slice(calls, [2], reachable=True)
+                        for i in b:
+                            if i[0].arg == b"\x00":
+                                isTransETH = False
+                                # print(f"This call is not transfering any ether")
+                        if isTransETH:
+                            ins.append(calls)
+                    restricted = True
+                source = cfg.findSource(reentrancy)
+                if sinkQueue.append(sink):
+                    for sink in sinkQueue:
+                        path.append(traverse_back(sink))
+                if pathQueue.append(path):
+                    res = checkReentrancy(path)
+            }while(cfg.update(path))
+            
+            output(res)
+            """
+
             for i, i_path, i_r in p.extract_paths(
                 ssa,
                 sub_ins,
@@ -196,6 +265,8 @@ def analysis(
                 restricted=restricted,
                 memory_info=None,
             ):
+                # print(f"Path: {i_path}, \n i_r: {i_r}, \n i:{i}")
+                analyzed_paths.append(i_path)
                 logging.debug("%s: %s", ins_type, i)
                 logging.debug("Path: %s", "->".join("%x" % p for p in i_path))
                 if i_r._tainted:
@@ -257,14 +328,40 @@ def analysis(
                         if defect_type not in (
                             ["Unbounded-Loop", "DoS-With-Failed-Call"]
                         ):
-                            print(
-                                "{0} at statment {1} in function: {2}".format(
-                                    user_alerts[i_r.defect_type],
-                                    i,
-                                    cinfo.get_function_sig(p, i_path),
+                            if defect_type in (["Reentrancy"]):
+                                sstorelist = [
+                                    s
+                                    for i in i_path[:-1]
+                                    for s in p.cfg._bb_at[i].ins
+                                    if s.name == "SSTORE"
+                                ]
+
+                                # protect pattern
+                                if len(sstorelist) != 0:
+                                    continue
+
+                                reentrancy_count += 1
+                                # append_to_csv(p.name, "Reentrancy")
+                                p.analysisPath(i_path)
+                                print(
+                                    "{0} at statment {1} in function: {2}\npath:{3}".format(
+                                        user_alerts[i_r.defect_type],
+                                        i,
+                                        cinfo.get_function_sig(p, i_path),
+                                        i_path,
+                                    )
                                 )
-                            )
-                            print("------------------\n")
+                                print("------------------\n")
+                                return
+                            else:
+                                print(
+                                    "{0} at statment {1} in function: {2}".format(
+                                        user_alerts[i_r.defect_type],
+                                        i,
+                                        cinfo.get_function_sig(p, i_path),
+                                    )
+                                )
+                                print("------------------\n")
                     elif (
                         defect_type in (["Gas-Griefing"])
                         and len(
@@ -355,14 +452,37 @@ def analysis(
                                 if defect_type not in (
                                     ["Unbounded-Loop", "DoS-With-Failed-Call"]
                                 ):
-                                    print(
-                                        "{0} at statment {1} in function: {2}".format(
-                                            user_alerts[i_r.defect_type],
-                                            i,
-                                            cinfo.get_function_sig(p, i_path),
+                                    if defect_type in (["Reentrancy"]):
+                                        sstorelist = [
+                                            s
+                                            for i in i_path[:-1]
+                                            for s in p.cfg._bb_at[i].ins
+                                            if s.name == "SSTORE"
+                                        ]
+                                        if len(sstorelist) != 0:
+                                            continue
+                                        reentrancy_count += 1
+                                        append_to_csv(p.name, "Reentrancy")
+                                        p.analysisPath(i_path)
+                                        print(
+                                            "{0} at statment {1} in function: {2}\npath:{3}".format(
+                                                user_alerts[i_r.defect_type],
+                                                i,
+                                                cinfo.get_function_sig(p, i_path),
+                                                i_path,
+                                            )
                                         )
-                                    )
-                                    print("------------------\n")
+                                        print("------------------\n")
+                                        return
+                                    else:
+                                        print(
+                                            "{0} at statment {1} in function: {2}".format(
+                                                user_alerts[i_r.defect_type],
+                                                i,
+                                                cinfo.get_function_sig(p, i_path),
+                                            )
+                                        )
+                                        print("------------------\n")
                                 break
         if defect_type in (["Unbounded-Loop"]):
             for l, hd in loops.items():
@@ -396,15 +516,12 @@ def analysis(
                                         v["increased_in"]
                                     )
                                 )
-                            ULisworth = True
                         print(v["ins"])
                     print("\n")
                     if r == 0:
                         unbounded_count += 1
-                        append_to_csv(projectinstance.name, "unbounded_count")
                     else:
                         unbounded_restr_count += 1
-                        append_to_csv(projectinstance.name, "unbounded_restr_count")
         if defect_type in (["DoS-With-Failed-Call"]):
             for l, hd in loops.items():
                 r1 = 0
@@ -423,30 +540,19 @@ def analysis(
                                     v["increased_in"]
                                 )
                             )
-                            DFisworth = True
-                            append_to_csv(projectinstance.name, "dos_with_failed_call")
                         print(v["ins"])
                     print("\n")
-    current_memory = process.memory_info().rss / (1024 * 1024)
-    if current_memory > peak_memory_use:
-        peak_memory_use = current_memory
-    return (
-        TainitAnalysisBugDetails(
-            unbounded_count,
-            unbounded_restr_count,
-            loop_calls_count,
-            griefing_count,
-            harcoded_count,
-            asserts_count,
-            slot_live_access_count,
-            temp_slots_count,
-        ),
-        peak_memory_use,
-        projectinstance.cfg.jumpcount,
-        ULisworth,
-        DFisworth,
-        p.ssaduration,
-    )
+    print(unbounded_count, unbounded_restr_count, loop_calls_count, reentrancy_count)
+    return TainitAnalysisBugDetails(
+        unbounded_count,
+        unbounded_restr_count,
+        loop_calls_count,
+        griefing_count,
+        harcoded_count,
+        asserts_count,
+        slot_live_access_count,
+        temp_slots_count,
+    ), reentrancy_count
 
 
 def main():
@@ -550,11 +656,9 @@ def main():
         CFG_endtime = time.time()
         CFG_endmem = process.memory_info().rss / (1024 * 1024) - startmem
         CFG_duration = CFG_endtime - _start
-        res, mem, jcount, ULisworth, DFisworth, SSA_duration = analysis(
-            p, initial_storage=initial_storage
-        )
+        analysis(p, initial_storage=initial_storage)
     except MemoryError as e:
-        resource.setrlimit(rsrc, (mem_limit*2, mem_limit*2))
+        resource.setrlimit(rsrc, (mem_limit * 2, mem_limit * 2))
         isMemoryError = True
         append_to_csv(name, "OOM")
         print("MemoryError")

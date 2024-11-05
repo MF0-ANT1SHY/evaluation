@@ -11,6 +11,23 @@ from src.slicing import interesting_slices, slice_to_program
 from src.util.z3_extra_util import concrete
 from src.flow.flow import run_static
 import src.flow.analysis_results as analysis_results
+import os
+import csv
+
+def collectjumpcount(defecttype, contract, path,jcount,rjcount,iteration=0,res=True, iscomplete=True,trjcount = -1):
+    filename = f"vul{defecttype}.csv"
+    file_exists = os.path.isfile(filename)
+
+    with open(filename, "a", newline="") as csvfile:
+        fieldnames = ["contract", "path", "length", "jcount", "reasonedjcount","totalrjcount","iteration", "result"]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        if not file_exists:
+            writer.writeheader()  # 如果文件不存在，写入标题行
+
+        writer.writerow(
+            {"contract": contract, "path": path, "length": len(path), "jcount": jcount, "reasonedjcount": rjcount,"totalrjcount": trjcount,"iteration":iteration, "result":res}
+        )
 
 def load(path):
     with open(path) as infile:
@@ -39,6 +56,22 @@ class Project(object):
         self._prg = None
         self._cfg = cfg
         self._writes = None
+
+    def analysisPath(self,path):
+        _jcount = [
+            addr
+            for addr in path
+            if addr in self.cfg._bb_at
+            if self.cfg._bb_at[addr].ins[-1].op in (0x56, 0x57)
+        ]
+        jcount = len(_jcount)
+        _rjcount = [
+            addr
+            for addr in path
+            if addr in self.cfg.whitelist
+        ]
+        rjcount = len(_rjcount)
+        collectjumpcount("donnot suuport",self.name,path,jcount,rjcount,self.cfg.iteration,True,True,self.cfg.jumpcount)
 
     @property
     def writes(self):

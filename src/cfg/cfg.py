@@ -11,6 +11,8 @@ from collections import defaultdict
 
 class CFG(object):
     def __init__(self, bbs, fix_xrefs=True, fix_only_easy_xrefs=False):
+        self.iteration = 0
+        self.whitelist = []
         self.maxmem = 0
         self.jumpcount = 0
         self.bbs = sorted(bbs)
@@ -22,6 +24,7 @@ class CFG(object):
             self._xrefs(fix_only_easy_xrefs)
         self._dominators = None
         self._dd = dict()
+
 
     @property
     def bb_addrs(self):
@@ -55,9 +58,11 @@ class CFG(object):
         new_link = True
         links = set()
         while new_link:
+            self.iteration += 1
             new_link = False
             for pred in self.bbs:
                 if not pred.jump_resolved:
+                    self.whitelist.append(pred.start)
                     self.jumpcount+=1
                     succ_addrs, new_succ_addrs = pred.get_succ_addrs_full(self.valid_jump_targets)
                     for new_succ_path, succ_addr in new_succ_addrs:
