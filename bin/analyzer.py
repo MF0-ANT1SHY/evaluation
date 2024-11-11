@@ -30,6 +30,68 @@ import csv
 logging.basicConfig(level=logging.INFO)
 
 
+def collectpath(
+    filename,
+    toolid="eTainter",
+    toolmode="runtime",
+    parser_version="2/27/2023",
+    runid=None,
+    start_time=0,
+    defecttype="",
+    path="",
+):
+    basename = os.path.basename(filename)
+    current_time = time.time()
+
+    if runid is None:
+        runid = time.strftime("%Y%m%d_%H%M")
+
+    output_filename = "analysis_results.csv"
+    file_exists = os.path.isfile(output_filename)
+
+    with open(output_filename, "a", newline="") as csvfile:
+        fieldnames = [
+            "filename",
+            "basename",
+            "toolid",
+            "toolmode",
+            "parser_version",
+            "runid",
+            "start",
+            "duration",
+            "exit_code",
+            "findings",
+            "infos",
+            "errors",
+            "fails",
+        ]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        if not file_exists:
+            writer.writeheader()
+
+        print(
+            f"current_time - start_time: {current_time - start_time}, current_time: {current_time}, start_time: {start_time}"
+        )
+        writer.writerow(
+            {
+                "filename": filename,
+                "basename": basename,
+                "toolid": toolid,
+                "toolmode": toolmode,
+                "parser_version": parser_version,
+                "runid": runid,
+                "start": start_time,
+                "duration": current_time - start_time,
+                "exit_code": 0,
+                "findings": f"{defecttype}",
+                "infos": f"{path}",
+                "errors": "{}",
+                "fails": "{}",
+            }
+        )
+
+
 def append_to_csv(contract, duration):
     filename = "OOM_cases.csv"
     file_exists = os.path.isfile(filename)
@@ -143,6 +205,7 @@ def analysis(
     max_calls=3,
     controlled_addrs=set(),
     flags=None,
+    vul=None,
 ):
     analyzed_paths = []
     user_alerts = {
@@ -169,8 +232,9 @@ def analysis(
     slot_live_access_count = 0
     reentrancy_count = 0
 
-    # for defect_type in list(["Unbounded-Loop", "DoS-With-Failed-Call", "Reentrancy"]):
-    for defect_type in list(["Reentrancy"]):
+    if vul in ["Unbounded-Loop", "DoS-With-Failed-Call", "Reentrancy"]:
+        defect_types = [vul]
+    for defect_type in defect_types:
         print("Checking contract for \033[4m{0}\033[0m ".format(defect_type))
         print("------------------\n")
         p.currentTask = defect_type
@@ -197,9 +261,7 @@ def analysis(
                 ins for bb in p.cfg.bbs for ins in bb.ins if ins.name in ["CALL"]
             ]
             for calls in set(vulcalls):
-                isTransETH = True
-                if isTransETH:
-                    ins.append(calls)
+                ins.append(calls)
             restricted = True
             # test
         else:
@@ -227,33 +289,6 @@ def analysis(
 
             if taintedBy == []:
                 taintedBy = opcodes.potentially_user_controlled
-
-            """
-            do{
-                if cfg.update == False:
-                    return
-                sink = cfg.findSink(reentrancy)
-                    vulcalls = p.cfg.call_sinks()
-                    for calls in set(vulcalls):
-                        isTransETH = True
-                        b = backward_slice(calls, [2], reachable=True)
-                        for i in b:
-                            if i[0].arg == b"\x00":
-                                isTransETH = False
-                                # print(f"This call is not transfering any ether")
-                        if isTransETH:
-                            ins.append(calls)
-                    restricted = True
-                source = cfg.findSource(reentrancy)
-                if sinkQueue.append(sink):
-                    for sink in sinkQueue:
-                        path.append(traverse_back(sink))
-                if pathQueue.append(path):
-                    res = checkReentrancy(path)
-            }while(cfg.update(path))
-            
-            output(res)
-            """
 
             for i, i_path, i_r in p.extract_paths(
                 ssa,
@@ -337,9 +372,25 @@ def analysis(
                                 ]
 
                                 # protect pattern
-                                if len(sstorelist) != 0:
+                                reachable = False
+                                correctpath = []
+                                path = i_path
+                                bb_SINK = p.cfg._ins_at[path[-1]].bb
+                                SSTORES = p.cfg.filter_ins("SSTORE", True)
+                                within_reachable = False
+                                for ins in bb_SINK.ins:
+                                    if (
+                                        ins.addr > p.cfg._ins_at[path[-1]].addr
+                                        and ins.name == "SSTORE"
+                                    ):
+                                        within_reachable = True
+                                bb_SSTORE = [sstore.bb.start for sstore in SSTORES]
+                                reachable = (
+                                    bool(set(bb_SSTORE) & bb_SINK.descendants)
+                                    or within_reachable
+                                )
+                                if not reachable:
                                     continue
-
                                 reentrancy_count += 1
                                 # append_to_csv(p.name, "Reentrancy")
                                 p.analysisPath(i_path)
@@ -352,6 +403,13 @@ def analysis(
                                     )
                                 )
                                 print("------------------\n")
+                                # ["Unbounded-Loop", "DoS-With-Failed-Call", "Reentrancy"]
+                                collectpath(
+                                    filename=p.filename,
+                                    start_time=p.starttime,
+                                    defecttype=p.defecttype,
+                                    path=i_path,
+                                )
                                 return
                             else:
                                 print(
@@ -473,6 +531,13 @@ def analysis(
                                             )
                                         )
                                         print("------------------\n")
+                                        collectpath(
+                                            filename=p.filename,
+                                            start_time=p.starttime,
+                                            # defecttype="Reentrancy",
+                                            defecttype=p.defecttype,
+                                            path=i_path,
+                                        )
                                         return
                                     else:
                                         print(
@@ -519,30 +584,52 @@ def analysis(
                         print(v["ins"])
                     print("\n")
                     if r == 0:
+                        p.analysisPath(i_path)
                         unbounded_count += 1
+                        collectpath(
+                            filename=p.filename,
+                            start_time=p.starttime,
+                            # defecttype="Unbounded-Loop",
+                            defecttype=p.defecttype,
+                            path=i_path,
+                        )
+                        return
                     else:
+                        p.analysisPath(i_path)
                         unbounded_restr_count += 1
+                        collectpath(
+                            filename=p.filename,
+                            start_time=p.starttime,
+                            defecttype=p.defecttype,
+                            path=i_path,
+                        )
+                        return
         if defect_type in (["DoS-With-Failed-Call"]):
             for l, hd in loops.items():
                 r1 = 0
                 v_ins = [b for b in loops_with_calls if b["block"] in set([l])]
                 if len(v_ins) != 0:
+                    p.analysisPath(i_path)
                     loop_calls_count += 1
                     print(
                         "{0} in function: {1}".format(
                             user_alerts[i_r.defect_type], v_ins[0]["function"]
                         )
                     )
-                    for v in v_ins:
-                        if v["increased_in"] is not None:
-                            print(
-                                "Following call target is tainted in function {0}".format(
-                                    v["increased_in"]
-                                )
-                            )
-                        print(v["ins"])
-                    print("\n")
+                    collectpath(
+                        filename=p.filename,
+                        start_time=p.starttime,
+                        defecttype=p.defecttype,
+                        path=i_path,
+                    )
+                    return
     print(unbounded_count, unbounded_restr_count, loop_calls_count, reentrancy_count)
+    collectpath(
+        filename=p.filename,
+        start_time=p.starttime,
+        defecttype=p.defecttype,
+        path="",
+    )
     return TainitAnalysisBugDetails(
         unbounded_count,
         unbounded_restr_count,
@@ -574,7 +661,7 @@ def main():
     )
 
     parser.add_argument("-m", "--memory", help="Max memory limit")
-
+    parser.add_argument("-v", "--vul", help="supported vul type")
     parser.add_argument("--initial_storage_file", help="initial storage file")
 
     parser.add_argument("-sf", "--savefile")
@@ -639,7 +726,7 @@ def main():
     _end = -1
     _duration = -1
     # 记录起始时间
-    _start = time.time()
+    _start = int(time.time())
     # 记录起始内存
     startmem = process.memory_info().rss / (1024 * 1024)
     try:
@@ -652,11 +739,14 @@ def main():
         code = bytes.fromhex(inbuffer)
         p = Project(code)
         p.name = name
+        p.defecttype = args.vul
+        p.filename = args.file
+        p.starttime = _start
         cfg = p.cfg
         CFG_endtime = time.time()
         CFG_endmem = process.memory_info().rss / (1024 * 1024) - startmem
         CFG_duration = CFG_endtime - _start
-        analysis(p, initial_storage=initial_storage)
+        analysis(p, initial_storage=initial_storage, vul=args.vul)
     except MemoryError as e:
         resource.setrlimit(rsrc, (mem_limit * 2, mem_limit * 2))
         isMemoryError = True

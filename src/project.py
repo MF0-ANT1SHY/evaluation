@@ -14,20 +14,50 @@ import src.flow.analysis_results as analysis_results
 import os
 import csv
 
-def collectjumpcount(defecttype, contract, path,jcount,rjcount,iteration=0,res=True, iscomplete=True,trjcount = -1):
+
+def collectjumpcount(
+    defecttype,
+    contract,
+    path,
+    jcount,
+    rjcount,
+    iteration=0,
+    res=True,
+    iscomplete=True,
+    trjcount=-1,
+):
     filename = f"vul{defecttype}.csv"
     file_exists = os.path.isfile(filename)
 
     with open(filename, "a", newline="") as csvfile:
-        fieldnames = ["contract", "path", "length", "jcount", "reasonedjcount","totalrjcount","iteration", "result"]
+        fieldnames = [
+            "contract",
+            "path",
+            "length",
+            "jcount",
+            "reasonedjcount",
+            "totalrjcount",
+            "iteration",
+            "result",
+        ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         if not file_exists:
             writer.writeheader()  # 如果文件不存在，写入标题行
 
         writer.writerow(
-            {"contract": contract, "path": path, "length": len(path), "jcount": jcount, "reasonedjcount": rjcount,"totalrjcount": trjcount,"iteration":iteration, "result":res}
+            {
+                "contract": contract,
+                "path": path,
+                "length": len(path),
+                "jcount": jcount,
+                "reasonedjcount": rjcount,
+                "totalrjcount": trjcount,
+                "iteration": iteration,
+                "result": res,
+            }
         )
+
 
 def load(path):
     with open(path) as infile:
@@ -36,12 +66,16 @@ def load(path):
 
 def load_json(path):
     import json
+
     with open(path) as infile:
         return Project.from_json(json.load(infile))
 
 
 class Project(object):
     def __init__(self, code, cfg=None):
+        self.defecttype = "default"
+        self.filename = "default"
+        self.starttime = 0
         self.ssaduration = 0
         self.newpath = 0
         self.coverage = 0
@@ -57,7 +91,7 @@ class Project(object):
         self._cfg = cfg
         self._writes = None
 
-    def analysisPath(self,path):
+    def analysisPath(self, path):
         _jcount = [
             addr
             for addr in path
@@ -65,13 +99,19 @@ class Project(object):
             if self.cfg._bb_at[addr].ins[-1].op in (0x56, 0x57)
         ]
         jcount = len(_jcount)
-        _rjcount = [
-            addr
-            for addr in path
-            if addr in self.cfg.whitelist
-        ]
+        _rjcount = [addr for addr in path if addr in self.cfg.whitelist]
         rjcount = len(_rjcount)
-        collectjumpcount("donnot suuport",self.name,path,jcount,rjcount,self.cfg.iteration,True,True,self.cfg.jumpcount)
+        collectjumpcount(
+            "donnot suuport",
+            self.name,
+            path,
+            jcount,
+            rjcount,
+            self.cfg.iteration,
+            True,
+            True,
+            self.cfg.jumpcount,
+        )
 
     @property
     def writes(self):
@@ -96,23 +136,23 @@ class Project(object):
         return self._prg
 
     def to_json(self):
-        return {'code': self.code.hex(), 'cfg': self.cfg.to_json()}
+        return {"code": self.code.hex(), "cfg": self.cfg.to_json()}
 
     @staticmethod
     def from_json(json_dict):
-        code = bytes.fromhex(json_dict['code'])
-        cfg = CFG.from_json(json_dict['cfg'], code)
+        code = bytes.fromhex(json_dict["code"])
+        cfg = CFG.from_json(json_dict["cfg"], code)
         return Project(code, cfg)
 
     def run(self, program):
         return run(program, code=self.code)
 
-    def run_symbolic(self, path, inclusive=False):        
-        #return run_symbolic(self.prg, path, self.code, inclusive=inclusive)
+    def run_symbolic(self, path, inclusive=False):
+        # return run_symbolic(self.prg, path, self.code, inclusive=inclusive)
         return run_symbolic(self.prg, path, self.code, inclusive=inclusive)
 
-    def _analyze_writes(self):        
-        sstore_ins = self.filter_ins('SSTORE')
+    def _analyze_writes(self):
+        sstore_ins = self.filter_ins("SSTORE")
         self._writes = defaultdict(set)
         for store in sstore_ins:
             for bs in interesting_slices(store):
@@ -122,7 +162,7 @@ class Project(object):
                 try:
                     r = run_symbolic(prg, path, self.code, inclusive=True)
                 except IntractablePath:
-                    logging.exception('Intractable Path while analyzing writes')
+                    logging.exception("Intractable Path while analyzing writes")
                     continue
                 addr = r.state.stack[-1]
                 if concrete(addr):
@@ -131,50 +171,105 @@ class Project(object):
                     self._writes[None].add(store)
         self._writes = dict(self._writes)
 
-    def get_writes_to (self, addr):
+    def get_writes_to(self, addr):
         concrete_writes = set()
         if concrete(addr) and addr in self.writes:
             concrete_writes = self.writes[addr]
         return concrete_writes, self.symbolic_writes
 
-    def extract_paths(self,ssa, instructions, sinks, taintedBy, defect_type, args=None, storage_slots=None, storage_sha3_bases=None, inclusive=False, find_sstore=False, restricted=True, memory_info=None):
-        # only check instructions that have a chance to reach root                        
-        instructions = [ins for ins in instructions if 0 in ins.bb.ancestors | {ins.bb.start}] 
+    def extract_paths(
+        self,
+        ssa,
+        instructions,
+        sinks,
+        taintedBy,
+        defect_type,
+        args=None,
+        storage_slots=None,
+        storage_sha3_bases=None,
+        inclusive=False,
+        find_sstore=False,
+        restricted=True,
+        memory_info=None,
+    ):
+        # only check instructions that have a chance to reach root
+        instructions = [
+            ins for ins in instructions if 0 in ins.bb.ancestors | {ins.bb.start}
+        ]
         if not instructions:
             return
         imap = {ins.addr: ins for ins in instructions}
 
-        exp = ForwardExplorer(self.cfg)        
-        if args:            
-            slices = [s+(ins,)  for ins in instructions for s in interesting_slices(ins, args, memory_info, reachable=True, taintedBy=taintedBy, restricted=restricted)]        
-                
-        checked_ins=[]         
-        c=0      
-        start_time=time.time()        
-        for path in exp.find(slices, avoid=[]):                  
-            #print(defect_type)
-            logging.debug('Path %s', ' -> '.join('%x' % p for p in path))                                                                 
-            c+=1    
-            try:                
-                ins = imap[path[-1]]                                  
-                if defect_type in set(['Unbounded-Loop','DoS-With-Failed-Call']):                    
-                    if ins in  analysis_results.checked_sinks   :                        
+        exp = ForwardExplorer(self.cfg)
+        if args:
+            slices = [
+                s + (ins,)
+                for ins in instructions
+                for s in interesting_slices(
+                    ins,
+                    args,
+                    memory_info,
+                    reachable=True,
+                    taintedBy=taintedBy,
+                    restricted=restricted,
+                )
+            ]
+
+        checked_ins = []
+        c = 0
+        start_time = time.time()
+        for path in exp.find(slices, avoid=[]):
+            # print(defect_type)
+            logging.debug("Path %s", " -> ".join("%x" % p for p in path))
+            c += 1
+            try:
+                ins = imap[path[-1]]
+                if defect_type in set(["Unbounded-Loop", "DoS-With-Failed-Call"]):
+                    if ins in analysis_results.checked_sinks:
                         continue
-                    else:    
-                        result= run_static(self.prg, ssa, path, sinks, self.code, inclusive,defect_type=defect_type, storage_slots=storage_slots, storage_sha3_bases=storage_sha3_bases)                                                                
+                    else:
+                        result = run_static(
+                            self.prg,
+                            ssa,
+                            path,
+                            sinks,
+                            self.code,
+                            inclusive,
+                            defect_type=defect_type,
+                            storage_slots=storage_slots,
+                            storage_sha3_bases=storage_sha3_bases,
+                        )
                         yield ins, path, result
-                else:        
-                    yield ins, path, run_static(self.prg, ssa, path, sinks, self.code, inclusive,defect_type=defect_type, storage_slots=storage_slots, storage_sha3_bases=storage_sha3_bases)                                                                
-                #if c>1:
+                else:
+                    yield (
+                        ins,
+                        path,
+                        run_static(
+                            self.prg,
+                            ssa,
+                            path,
+                            sinks,
+                            self.code,
+                            inclusive,
+                            defect_type=defect_type,
+                            storage_slots=storage_slots,
+                            storage_sha3_bases=storage_sha3_bases,
+                        ),
+                    )
+                # if c>1:
                 #    exit()
-            except IntractablePath as e:                  
-                bad_path = [i for i in e.trace if i in self.cfg._bb_at] #+ [e.remainingpath[0]]  #check: no need for this                
+            except IntractablePath as e:
+                bad_path = [
+                    i for i in e.trace if i in self.cfg._bb_at
+                ]  # + [e.remainingpath[0]]  #check: no need for this
                 dd = self.cfg.data_dependence(self.cfg._ins_at[e.trace[-1]])
-                if not any(i.name in ('MLOAD', 'SLOAD') for i in dd):
+                if not any(i.name in ("MLOAD", "SLOAD") for i in dd):
                     ddbbs = set(i.bb.start for i in dd)
-                    bad_path_start = next((j for j, i in enumerate(bad_path) if i in ddbbs), 0)
+                    bad_path_start = next(
+                        (j for j, i in enumerate(bad_path) if i in ddbbs), 0
+                    )
                     bad_path = bad_path[bad_path_start:]
-                logging.debug("Bad path: %s" % (', '.join('%x' % i for i in bad_path)))
+                logging.debug("Bad path: %s" % (", ".join("%x" % i for i in bad_path)))
                 exp.add_to_blacklist(bad_path)
                 continue
             except ExternalData:
@@ -182,6 +277,5 @@ class Project(object):
             except TimeoutException:
                 raise TimeoutException("Timed out!")
             except Exception as e:
-                logging.exception('Failed path due to %s', e)     
+                logging.exception("Failed path due to %s", e)
                 continue
-            

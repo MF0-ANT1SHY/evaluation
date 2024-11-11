@@ -1,0 +1,17 @@
+[
+    {
+        "timeout": 1800,
+        "from": "/home/shuo/smartbugs-curated/full",
+        "vul": "Unbounded-Loop"
+    },
+    {
+        "timeout": 1800,
+        "from": "/home/shuo/smartbugs-curated/full",
+        "vul": "DoS-With-Failed-Call"
+    },
+    {
+        "timeout": 1800,
+        "from": "/home/shuo/smartbugs-curated/full",
+        "vul": "Reentrancy"
+    }
+]
