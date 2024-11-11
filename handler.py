@@ -30,7 +30,7 @@ def run_process(args):
     file, timeoutsize, vul = args
     starttime = time.time()
     name = file.rsplit("/", 1)[-1]
-    cmd = ["python3", "bin/test.py", "-f", file, "-b", "-v", vul, "-t", "early"]
+    cmd = ["python3", "bin/analyzer.py", "-f", file, "-b", "-v", vul]
     try:
         subprocess.run(cmd, timeout=timeoutsize)
     except subprocess.TimeoutExpired:

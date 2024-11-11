@@ -102,7 +102,7 @@ class Project(object):
         _rjcount = [addr for addr in path if addr in self.cfg.whitelist]
         rjcount = len(_rjcount)
         collectjumpcount(
-            "donnot suuport",
+            self.defecttype,
             self.name,
             path,
             jcount,

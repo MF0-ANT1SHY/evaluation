@@ -1,0 +1,70 @@
+contract,path,length,jcount,reasonedjcount,totalrjcount,iteration,result
+reentrancy.0x627fa62ccbb1c1b04ffaecd72a53e37fc0e17839_sol_TokenBank.hex,"[0, 13, 65, 76, 87, 98, 109, 120, 131, 142, 634, 1814, 1901, 1973, 2012]",15,14,0,11,2,True
+reentrancy.etherstore_sol_EtherStore.hex,"[0, 13, 65, 201, 213, 410, 488, 505, 588, 628]",10,9,0,5,2,True
+time_manipulation.lottopollo_sol_lottopollo.hex,"[0, 13, 81, 93, 169, 194, 179, 202, 222, 228, 314, 417]",12,10,1,4,3,True
+unchecked_low_level_calls.0xe09b1ab8111c2729a76f16de96bc86a7af837928_sol_FiftyFlip.hex,"[0, 13, 65, 76, 87, 479, 491, 4058, 4289, 4435, 4561, 10346, 10467]",13,12,0,38,3,True
+reentrancy.0x4e73b32ed6c35f570686b89848e5f39f20ecc106_sol_PRIVATE_ETH_CELL.hex,"[0, 13, 65, 76, 295, 924, 1066, 1072, 1111]",9,8,0,7,2,True
+reentrancy.0x941d225236464a25eb18076df7da6a91d0f95e9e_sol_ETH_FUND.hex,"[0, 13, 65, 76, 230, 302, 381, 387, 426]",9,8,0,4,2,True
+access_control.incorrect_constructor_name3_sol_Missing.hex,"[0, 13, 78, 90, 124, 215, 319]",7,6,0,2,2,True
+reentrancy.reentrancy_cross_function_sol_Reentrancy_cross_function.hex,"[0, 13, 81, 93, 181, 295]",6,5,0,2,2,True
+reentrancy.0x7b368c4e805c3870b6c49a3f1f49f69af8662cf3_sol_W_WALLET.hex,"[0, 13, 110, 700, 792, 807, 813, 852]",8,7,0,4,2,True
+reentrancy.0x8c7777c45481dba411450c228cb692ac3d550344_sol_ETH_VAULT.hex,"[0, 13, 65, 76, 230, 302, 374, 413]",8,7,0,4,2,True
+unchecked_low_level_calls.0x7a4349a749e59a5736efb7826ee3496a2dfd5489_sol_WhaleGiveaway1.hex,"[0, 13, 100, 331, 488, 579, 683]",7,6,0,4,2,True
+reentrancy.0xb5e1b1ee15c6fa0e48fce100125569d430f1bd12_sol_Private_Bank.hex,"[0, 13, 65, 76, 230, 302, 374, 413]",8,7,0,4,2,True
+access_control.wallet_04_confused_sign_sol_Wallet.hex,"[0, 13, 92, 104, 214, 292, 340]",7,6,0,4,2,True
+unchecked_low_level_calls.0x958a8f594101d2c0485a52319f29b2647f2ebc06_sol_Marriage.hex,"[0, 13, 65, 653, 3650, 3801, 3830, 3840, 3943]",9,8,0,40,4,True
+reentrancy.0x4320e6f8c05b27ab4707cd1f6d5ce6f3e4b3a5a1_sol_ACCURAL_DEPOSIT.hex,"[0, 13, 65, 76, 295, 922, 1064, 1070, 1109]",9,8,0,7,2,True
+front_running.eth_tx_order_dependence_minimal_sol_EthTxOrderDependenceMinimal.hex,"[0, 13, 65, 157, 352, 380, 471, 554]",8,7,0,5,2,True
+reentrancy.reentrancy_dao_sol_ReentrancyDAO.hex,"[0, 13, 81, 93, 114, 192, 247]",7,6,0,2,2,True
+unchecked_low_level_calls.0xf70d589d76eebdd7c12cc5eec99f8f6fa4233b9e_sol_WhaleGiveaway2.hex,"[0, 13, 100, 331, 488, 579, 683]",7,6,0,4,2,True
+unchecked_low_level_calls.0xe4eabdca81e31d9acbc4af76b30f532b6ed7f3bf_sol_Honey.hex,"[0, 13, 100, 331, 488, 579, 683]",7,6,0,4,2,True
+unchecked_low_level_calls.0x627fa62ccbb1c1b04ffaecd72a53e37fc0e17839_sol_TokenBank.hex,"[0, 13, 65, 76, 87, 98, 109, 120, 131, 142, 634, 1814, 1901, 1973, 2012]",15,14,0,11,2,True
+reentrancy.0x561eac93c92360949ab1f1403323e6db345cbf31_sol_BANK_SAFE.hex,"[0, 13, 65, 76, 295, 922, 1064, 1070, 1109]",9,8,0,7,2,True
+bad_randomness.lucky_doubler_sol_LuckyDoubler.hex,"[0, 142, 154, 1212, 1287, 2775, 2811, 2868]",8,6,0,17,2,True
+unchecked_low_level_calls.0x78c2a1e91b52bca4130b6ed9edd9fbcfd4671c37_sol_WhaleGiveaway1.hex,"[0, 13, 111, 385, 542, 633, 737]",7,6,0,5,2,True
+denial_of_service.auction_sol_DosAuction.hex,"[0, 13, 70, 80, 96, 162, 244]",7,6,0,1,2,True
+reentrancy.0x7a8721a9d64c74da899424c1b52acbf58ddc9782_sol_PrivateDeposit.hex,"[0, 13, 65, 76, 87, 98, 406, 418, 689, 761, 800]",11,10,0,6,2,True
+reentrancy.0x93c32845fae42c83a70e5f06214c8433665c2ab5_sol_X_WALLET.hex,"[0, 13, 110, 700, 792, 807, 813, 852]",8,7,0,4,2,True
+unchecked_low_level_calls.king_of_the_ether_throne_sol_KingOfTheEtherThrone.hex,"[0, 131, 143, 949, 1029, 1040, 1094]",7,5,0,26,4,True
+reentrancy.0xb93430ce38ac4a6bb47fb1fc085ea669353fd89e_sol_PrivateBank.hex,"[0, 13, 65, 76, 230, 242, 315, 387, 426]",9,8,0,4,2,True
+other.crypto_roulette_sol_CryptoRoulette.hex,"[0, 13, 65, 76, 261, 680, 701, 712, 961, 1031]",10,9,0,8,3,True
+unchecked_low_level_calls.0xb7c5c5aa4d42967efe906e1b66cb8df9cebf04f7_sol_keepMyEther.hex,"[0, 13, 65, 241, 253, 288, 390]",7,6,1,2,2,True
+reentrancy.reentrance_sol_Reentrance.hex,"[0, 13, 64, 75, 240, 252, 475, 547, 586]",9,7,0,4,2,True
+unchecked_low_level_calls.etherpot_lotto_sol_Lotto.hex,"[0, 230, 242, 1937, 1952, 257, 278, 297, 306, 355]",10,8,1,31,3,True
+unchecked_low_level_calls.0x806a6bd219f162442d992bdc4ee6eba1f2c5a707_sol_Pie.hex,"[0, 13, 100, 331, 488, 579, 683]",7,6,0,4,2,True
+reentrancy.etherbank_sol_EtherBank.hex,"[0, 13, 92, 104, 225, 332]",6,5,0,5,2,True
+unchecked_low_level_calls.0xe82f0742a71a02b9e9ffc142fdcb6eb1ed06fb87_sol_Freebie.hex,"[0, 13, 100, 331, 488, 579, 683]",7,6,0,4,2,True
+reentrancy.0x23a91059fdc9579a9fbd0edc5f2ea0bfdb70deb4_sol_PrivateBank.hex,"[0, 13, 65, 76, 230, 242, 315, 387, 426]",9,8,0,4,2,True
+unchecked_low_level_calls.0xdb1c55f6926e7d847ddf8678905ad871a68199d2_sol_FreeEth.hex,"[0, 13, 100, 331, 488, 579, 683]",7,6,0,4,2,True
+unchecked_low_level_calls.0x3f2ef511aa6e75231e4deafc7a3d2ecab3741de2_sol_WhaleGiveaway2.hex,"[0, 13, 111, 385, 542, 633, 737]",7,6,0,5,2,True
+reentrancy.reentrancy_insecure_sol_Reentrancy_insecure.hex,"[0, 16, 26, 48, 58, 173]",6,5,0,1,2,True
+reentrancy.0xcead721ef5b11f1a7b530171aab69b16c5e66b6e_sol_WALLET.hex,"[0, 13, 110, 700, 792, 807, 813, 852]",8,7,0,4,2,True
+time_manipulation.ether_lotto_sol_EtherLotto.hex,"[0, 13, 65, 76, 222, 275, 289, 342, 355, 458, 511]",11,10,0,4,2,True
+unchecked_low_level_calls.0x89c1b3807d4c67df034fffb62f3509561218d30b_sol_TownCrier.hex,"[0, 13, 65, 76, 87, 98, 109, 574, 586, 2336, 2360, 2490, 2496, 2519, 2621]",15,14,0,23,2,True
+reentrancy.0x01f8c4e3fa3edeb29e514cba738d87ce8c091d3f_sol_PERSONAL_BANK.hex,"[0, 13, 65, 76, 295, 922, 1064, 1070, 1109]",9,8,0,7,2,True
+reentrancy.0xaae1f51cf3339f18b6d3f3bdc75a5facd744b0b8_sol_DEP_BANK.hex,"[0, 13, 65, 76, 295, 922, 1064, 1070, 1109]",9,8,0,7,2,True
+unchecked_low_level_calls.0x663e4229142a27f00bafb5d087e1e730648314c3_sol_SaleClockAuction.hex,"[0, 13, 65, 76, 87, 98, 531, 2695, 5901, 6330, 5942, 5953, 6454, 6543, 6939, 6955, 6992, 6689, 5962, 5979, 6697, 6027, 6124, 6177]",24,23,4,71,5,True
+unchecked_low_level_calls.0xb620cee6b52f96f3c6b253e6eea556aa2d214a99_sol_DrainMe.hex,"[0, 13, 65, 76, 87, 98, 109, 120, 131, 142, 153, 532, 2680, 2771, 2875]",15,14,0,32,3,True
+reentrancy.0x96edbe868531bd23a6c05e9d0c424ea64fb1b78b_sol_PENNY_BY_PENNY.hex,"[0, 13, 65, 210, 965, 1057, 1072, 1078, 1117]",9,8,0,7,2,True
+denial_of_service.list_dos_sol_Government.hex,"[0, 208, 220, 1168, 1189, 1236]",6,5,0,26,3,True
+access_control.incorrect_constructor_name2_sol_Missing.hex,"[0, 13, 78, 90, 124, 215, 319]",7,6,0,2,2,True
+reentrancy.0x7541b76cb60f4c60af330c208b0623b7f54bf615_sol_U_BANK.hex,"[0, 13, 110, 700, 792, 807, 813, 852]",8,7,0,4,2,True
+reentrancy.0xbaf51e761510c1a11bf48dd87c0307ac8a8c8a4f_sol_ETH_VAULT.hex,"[0, 13, 65, 76, 230, 302, 374, 413]",8,7,0,4,2,True
+reentrancy.0xf015c35649c82f5467c9c74b7f28ee67665aad68_sol_MY_BANK.hex,"[0, 13, 110, 700, 792, 807, 813, 852]",8,7,0,4,2,True
+access_control.wallet_03_wrong_constructor_sol_Wallet.hex,"[0, 13, 103, 115, 248, 326, 374]",7,6,0,4,2,True
+unchecked_low_level_calls.0xd2018bfaa266a9ec0a1a84b061640faa009def76_sol_Pie.hex,"[0, 13, 100, 331, 488, 579, 683]",7,6,0,4,2,True
+reentrancy.reentrancy_bonus_sol_Reentrancy_bonus.hex,"[0, 13, 65, 148, 160, 481, 665]",7,6,0,3,3,True
+access_control.incorrect_constructor_name1_sol_Missing.hex,"[0, 13, 65, 101, 113, 190, 281, 385]",8,7,0,2,2,True
+reentrancy.simple_dao_sol_SimpleDAO.hex,"[0, 13, 64, 156, 168, 454, 528, 567]",8,6,0,4,2,True
+reentrancy.modifier_reentrancy_sol_ModifierEntrancy.hex,"[0, 13, 81, 93, 191, 268, 368, 371]",8,7,0,2,2,True
+reentrancy.reentrancy_simple_sol_Reentrance.hex,"[0, 13, 92, 104, 212, 314]",6,5,0,4,2,True
+unchecked_low_level_calls.0x663e4229142a27f00bafb5d087e1e730648314c3_sol_PandaMinting.hex,"[0, 13, 65, 76, 87, 98, 109, 120, 1312, 1324, 6545, 6638, 6741, 6744]",14,13,0,207,5,True
+unchecked_low_level_calls.0x663e4229142a27f00bafb5d087e1e730648314c3_sol_SaleClockAuctionERC20.hex,"[0, 13, 65, 76, 87, 98, 109, 120, 131, 142, 153, 164, 175, 186, 197, 208, 219, 230, 241, 252, 263, 274, 285, 1849, 1861, 5285, 5461, 7567, 6615, 7606, 7617, 7772, 7783, 6739, 6789, 6828, 9111, 9127, 9164, 6974, 7792, 7809, 8896, 7857, 7867, 9175, 9194, 7875, 8097, 8100]",50,48,5,66,4,True
+unchecked_low_level_calls.0x663e4229142a27f00bafb5d087e1e730648314c3_sol_PandaBreeding.hex,"[0, 13, 65, 76, 87, 98, 109, 120, 131, 142, 153, 164, 1433, 1445, 5638, 5731, 5834, 5837]",18,17,0,131,4,True
+bad_randomness.smart_billions_sol_SmartBillions.hex,"[0, 13, 860, 4130, 4162, 4169, 4177, 4188, 4206, 17401, 17415, 4276, 4297]",13,11,2,178,4,True
+unchecked_low_level_calls.0x663e4229142a27f00bafb5d087e1e730648314c3_sol_PandaAuction.hex,"[0, 13, 65, 76, 87, 98, 109, 1192, 1204, 6100, 6193, 6296, 6299]",13,12,0,158,4,True
+reentrancy.0xbe4041d55db380c5ae9d4a9b9703f1ed4e7e3888_sol_MONEY_BOX.hex,"[0, 13, 65, 210, 965, 1057, 1072, 1078, 1117]",9,8,0,7,2,True
+access_control.wallet_02_refund_nosub_sol_Wallet.hex,"[0, 13, 103, 115, 248, 326, 374]",7,6,0,4,2,True
+unchecked_low_level_calls.0x663e4229142a27f00bafb5d087e1e730648314c3_sol_PandaCore.hex,"[0, 13, 65, 76, 87, 98, 109, 120, 131, 1720, 1732, 7572, 7665, 7768, 7771]",15,14,0,214,5,True
+other.open_address_lottery_sol_OpenAddressLottery.hex,"[0, 98, 199, 205, 358, 381, 476, 801, 873, 952, 488, 495, 646, 694]",14,13,1,6,3,True
+unchecked_low_level_calls.0x70f9eddb3931491aab1aeafbc1e7f1ca2a012db4_sol_HomeyJar.hex,"[0, 13, 100, 331, 488, 579, 683]",7,6,0,4,2,True
