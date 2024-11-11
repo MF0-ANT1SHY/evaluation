@@ -63,7 +63,7 @@ def calculate_pool_size():
 
 
 def main():
-    with open("config.json", "r") as file:
+    with open("reentrancy.json", "r") as file:
         configs = json.load(file)
 
     num_processes = calculate_pool_size()

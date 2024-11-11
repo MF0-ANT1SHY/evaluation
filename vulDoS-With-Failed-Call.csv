@@ -1,3 +1,0 @@
-contract,path,length,jcount,reasonedjcount,totalrjcount,iteration,result
-bad_randomness.etheraffle_sol_Ethraffle_v4b.hex,"[0, 13, 65, 76, 87, 98, 109, 120, 131, 142, 153, 164, 175, 580, 592, 2241, 2329, 2360, 2370, 2402, 2681, 2703]",22,20,0,24,2,True
-access_control.rubixi_sol_Rubixi.hex,"[0, 219, 231, 1276, 1315, 1354, 2921, 2980, 3126, 3162, 3179, 3208, 3225, 3242, 3270, 3286, 3323, 3420]",18,16,0,19,2,True
