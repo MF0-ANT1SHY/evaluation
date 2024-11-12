@@ -1,7 +1,7 @@
 [
     {
         "timeout": 1800,
-        "from": "/home/shuo/repo/ReentrancyStudy-Data/bytecodes",
+        "from": "/home/shuo/repo/ReentrancyStudy-Data/bytecodes_500",
         "vul": "Reentrancy"
     }
 ]
