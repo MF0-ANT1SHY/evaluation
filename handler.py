@@ -63,10 +63,10 @@ def calculate_pool_size():
 
 
 def main():
-    with open("reentrancy.json", "r") as file:
+    with open("remaining.json", "r") as file:
         configs = json.load(file)
 
-    num_processes = calculate_pool_size()
+    num_processes = 96
     print(f"Starting {num_processes} processes...")
 
     # Create a single pool for all configurations
@@ -80,7 +80,8 @@ def main():
             vul = config["vul"]
 
             directory_path = os.path.expanduser(from_dir)
-            filelist = get_file_list(directory_path)
+            # filelist = get_file_list(directory_path)
+            filelist = sorted(get_file_list(directory_path))
 
             # Create tasks for this configuration
             config_tasks = [(file, timeout, vul) for file in filelist]
